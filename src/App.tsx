@@ -493,8 +493,8 @@ export function App() {
         <div className="header">
           <div className="logo">⚡</div>
           <div>
-            <div className="header-title">NehemiahUSD</div>
-            <div className="header-subtitle">Stablecoin Dashboard</div>
+          <div className="header-title">Tempo Forge</div>
+          <div className="header-subtitle">Stablecoin Launchpad</div>
           </div>
           <span className="badge">Testnet</span>
         </div>
@@ -524,37 +524,203 @@ export function App() {
 
 export function Connect() {
   const connect = useConnect()
-  const [connector] = useConnectors()
+  const connectors = useConnectors()
+  const [showModal, setShowModal] = useState(false)
+
+  const modalStyles = `
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 28px;
+      width: 100%;
+      max-width: 360px;
+      position: relative;
+    }
+    .modal-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .modal-sub {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+    .modal-close {
+      position: absolute;
+      top: 16px; right: 16px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      width: 28px; height: 28px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .wallet-option {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      padding: 14px 16px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      cursor: pointer;
+      margin-bottom: 10px;
+      transition: all 0.15s;
+      text-align: left;
+    }
+    .wallet-option:hover {
+      border-color: var(--accent2);
+      background: rgba(124,92,252,0.08);
+    }
+    .wallet-option:last-child { margin-bottom: 0; }
+    .wallet-icon {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+    .wallet-info { flex: 1; }
+    .wallet-name { font-weight: 500; color: var(--text); }
+    .wallet-desc { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 14px 0;
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+  `
 
   if (connect.isPending) return (
     <div className="connect-wrapper">
-      <p className="loading">Check your passkey prompt...</p>
+      <p className="loading">Connecting wallet...</p>
     </div>
   )
 
+  // separate metamask from passkey
+  const injectedConnectors = connectors.filter(c => c.type === 'injected')
+  const passkeyConnector = connectors.find(c => c.type !== 'injected')
+
   return (
-    <div className="connect-wrapper">
-      <div className="connect-hero">Launch your<br />stablecoin.</div>
-      <p className="connect-sub">
-        Deploy, mint, and manage TIP-20 tokens<br />on the Tempo testnet.
-      </p>
-      <div className="connect-buttons">
-        <button
-          className="btn btn-primary"
-          onClick={() => connect.connect({ connector, capabilities: { type: 'sign-up' } })}
-          type="button"
-        >
-          ✦ Create Account
-        </button>
-        <button
-          className="btn btn-ghost"
-          onClick={() => connect.connect({ connector })}
-          type="button"
-        >
-          Sign In
-        </button>
+    <>
+      <style>{modalStyles}</style>
+      <div className="connect-wrapper">
+        <div className="connect-hero">Launch your<br />stablecoin.</div>
+        <p className="connect-sub">
+          Deploy, mint, and manage TIP-20 tokens<br />on the Tempo testnet.
+        </p>
+        <div className="connect-buttons">
+          <button
+            className="btn btn-accent"
+            onClick={() => setShowModal(true)}
+            type="button"
+          >
+            Connect Wallet
+          </button>
+        </div>
       </div>
+
+      {showModal && (
+        <div className="modal-overlay" onClick={() => setShowModal(false)}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <button className="modal-close" onClick={() => setShowModal(false)}>✕</button>
+            <div className="modal-title">Connect Wallet</div>
+            <p className="modal-sub">Choose how you want to connect</p>
+
+           {injectedConnectors.length > 0 && (
+  <button
+    className="wallet-option"
+    onClick={() => { connect.connect({ connector: injectedConnectors[0] }); setShowModal(false) }}
+  >
+    <div className="wallet-icon" style={{ background: 'rgba(255,153,0,0.15)' }}>🦊</div>
+    <div className="wallet-info">
+      <div className="wallet-name">MetaMask</div>
+      <div className="wallet-desc">Connect with your browser wallet</div>
     </div>
+    <span style={{ color: 'var(--muted)', fontSize: 12 }}>→</span>
+  </button>
+)}
+
+            {injectedConnectors.length === 0 && (
+              <button
+                className="wallet-option"
+                style={{ opacity: 0.5, cursor: 'not-allowed' }}
+                disabled
+              >
+                <div className="wallet-icon" style={{ background: 'rgba(255,153,0,0.15)' }}>🦊</div>
+                <div className="wallet-info">
+                  <div className="wallet-name">MetaMask</div>
+                  <div className="wallet-desc">Not detected — install MetaMask first</div>
+                </div>
+              </button>
+            )}
+
+            <div className="divider">or</div>
+
+            {passkeyConnector && (
+              <>
+                <button
+                  className="wallet-option"
+                  onClick={() => { connect.connect({ connector: passkeyConnector, capabilities: { type: 'sign-up' } }); setShowModal(false) }}
+                >
+                  <div className="wallet-icon" style={{ background: 'rgba(0,229,160,0.15)' }}>🔑</div>
+                  <div className="wallet-info">
+                    <div className="wallet-name">Create Passkey Account</div>
+                    <div className="wallet-desc">New to Tempo? Start here</div>
+                  </div>
+                  <span style={{ color: 'var(--muted)', fontSize: 12 }}>→</span>
+                </button>
+
+                <button
+                  className="wallet-option"
+                  onClick={() => { connect.connect({ connector: passkeyConnector }); setShowModal(false) }}
+                >
+                  <div className="wallet-icon" style={{ background: 'rgba(124,92,252,0.15)' }}>✦</div>
+                  <div className="wallet-info">
+                    <div className="wallet-name">Sign In with Passkey</div>
+                    <div className="wallet-desc">Already have an account</div>
+                  </div>
+                  <span style={{ color: 'var(--muted)', fontSize: 12 }}>→</span>
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+    </>
   )
 }
 

@@ -1,6 +1,6 @@
 import { QueryClient } from '@tanstack/react-query'
 import { tempoModerato } from 'viem/chains'
-import { createConfig, webSocket } from 'wagmi'
+import { createConfig, injected, webSocket } from 'wagmi'
 import { KeyManager, webAuthn } from 'wagmi/tempo'
 
 export const pathUsd = '0x20c0000000000000000000000000000000000000'
@@ -10,12 +10,13 @@ export const queryClient = new QueryClient()
 
 export const config = createConfig({
   connectors: [
+    injected(), // MetaMask + any browser wallet
     webAuthn({
       keyManager: KeyManager.localStorage(),
     }),
   ],
   chains: [tempoModerato.extend({ feeToken: alphaUsd })],
-  multiInjectedProviderDiscovery: false,
+  multiInjectedProviderDiscovery: true,
   transports: {
     [tempoModerato.id]: webSocket(),
   },
