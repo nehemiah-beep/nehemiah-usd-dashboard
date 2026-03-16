@@ -16,7 +16,7 @@
 
 ## 🪙 What is Tempo Forge?
 
-Tempo Forge is a community-built dashboard that lets anyone deploy, mint, and manage TIP-20 stablecoins on the Tempo testnet — no coding required.
+Tempo Forge is a community-built dashboard that lets anyone deploy, mint, and manage TIP-20 stablecoins on the Tempo testnet no coding required.
 
 Built on top of Tempo's official SDK, it provides a clean, modern UI for the full stablecoin lifecycle.
 
