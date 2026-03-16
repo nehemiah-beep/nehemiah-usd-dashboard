@@ -872,7 +872,15 @@ export function GrantTokenRoles(props: {
 }) {
   const { token, roles } = props
   const { address } = useAccount()
-  const grant = Hooks.token.useGrantRolesSync()
+  const [rolesGranted, setRolesGranted] = useState(false)
+
+  const grant = Hooks.token.useGrantRolesSync({
+    mutation: {
+      onSuccess() {
+        setRolesGranted(true)
+      }
+    }
+  })
 
   return (
     <div>
@@ -905,7 +913,7 @@ export function GrantTokenRoles(props: {
         </form>
       </div>
 
-      {(grant.isSuccess || grant.data) && (
+      {(rolesGranted || grant.isSuccess || grant.data) && (
         <>
           <div className="section-divider">Token Management</div>
           <SetSupplyCap token={token} />
@@ -927,7 +935,6 @@ export function GrantTokenRoles(props: {
     </div>
   )
 }
-
 export function MintToken(props: { token: Address }) {
   const { token } = props
   const { address } = useAccount()
