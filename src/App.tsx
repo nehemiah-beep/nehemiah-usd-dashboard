@@ -905,7 +905,7 @@ export function GrantTokenRoles(props: {
         </form>
       </div>
 
-      {grant.isSuccess && (
+      {(grant.isSuccess || grant.data) && (
         <>
           <div className="section-divider">Token Management</div>
           <SetSupplyCap token={token} />
